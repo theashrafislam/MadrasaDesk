@@ -11,10 +11,15 @@ import {
   Platform,
   SafeAreaView,
   StatusBar,
+  Dimensions,
 } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 const Tab = createBottomTabNavigator();
+
+// Responsive font size function
+const { width } = Dimensions.get('window');
+const responsiveFontSize = (f) => Math.round((f * width) / 375);
 
 // Sample data for 5 tabs
 const tabData = {
@@ -80,7 +85,6 @@ const tabData = {
   ],
 };
 
-
 // Tab screen
 function TabScreen({ data }) {
   const [message, setMessage] = useState('');
@@ -101,10 +105,6 @@ function TabScreen({ data }) {
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        {/* TopBar */}
-        {/* <TopBar firstPerson={data[0]} /> */}
-
-        {/* Person list */}
         <FlatList
           data={data}
           keyExtractor={(item) => item.id}
@@ -121,7 +121,6 @@ function TabScreen({ data }) {
           }}
         />
 
-        {/* Bottom message input */}
         <View style={styles.messageBoxContainer}>
           <TextInput
             style={styles.input}
@@ -149,13 +148,55 @@ function TabScreen({ data }) {
 // Dashboard with 5 tabs
 export default function Dashboard() {
   return (
-    <Tab.Navigator screenOptions={{ headerShown: false }}>
-      <Tab.Screen name="Tab1">{() => <TabScreen data={tabData.Tab1} />}</Tab.Screen>
-      <Tab.Screen name="Tab2">{() => <TabScreen data={tabData.Tab2} />}</Tab.Screen>
-      <Tab.Screen name="Tab3">{() => <TabScreen data={tabData.Tab3} />}</Tab.Screen>
-      <Tab.Screen name="Tab4">{() => <TabScreen data={tabData.Tab4} />}</Tab.Screen>
-      <Tab.Screen name="Tab5">{() => <TabScreen data={tabData.Tab5} />}</Tab.Screen>
-    </Tab.Navigator>
+    <Tab.Navigator
+  screenOptions={{
+    headerShown: false,
+    tabBarIcon: () => null,
+    tabBarLabelStyle: {
+      fontSize: responsiveFontSize(14),
+      fontWeight: 'bold',
+      paddingVertical: 5,
+    },
+    tabBarStyle: {
+      height: 60,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+  }}
+>
+  {Object.keys(tabData).map((tabName) => (
+    <Tab.Screen
+      key={tabName}
+      name={tabName}
+      children={() => <TabScreen data={tabData[tabName]} />}
+      options={{
+        tabBarLabel: ({ focused }) => (
+          <View
+            style={{
+              backgroundColor: focused ? '#4a90e2' : 'transparent',
+              paddingHorizontal: 18,
+              paddingVertical: 22,
+              borderRadius: 13,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Text
+              style={{
+                color: focused ? '#fff' : '#000',
+                fontWeight: 'bold',
+                fontSize: responsiveFontSize(14),
+                textAlign: 'center',
+              }}
+            >
+              {tabName}
+            </Text>
+          </View>
+        ),
+      }}
+    />
+  ))}
+</Tab.Navigator>
   );
 }
 
@@ -165,54 +206,35 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
-  topBar: {
-    padding: 15,
-    backgroundColor: '#f0f0f0',
-    alignItems: 'flex-start',
-    borderBottomWidth: 1,
-    borderColor: '#ddd',
-  },
-  personName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  personDetails: {
-    fontSize: 14,
-    color: '#555',
-  },
   personCard: {
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  backgroundColor: '#fff',
-  padding: 15,
-  marginVertical: 5,
-  marginHorizontal: 10,
-  borderRadius: 10,
-  shadowColor: '#000',
-  shadowOpacity: 0.1,
-  shadowRadius: 5,
-  elevation: 3,
-},
-leftText: {
-  flex: 1,
-  textAlign: 'left',
-  fontSize: 16,
-  fontWeight: '500',
-},
-centerText: {
-  flex: 1,
-  textAlign: 'center',
-  fontSize: 16,
-  fontWeight: '500',
-},
-rightText: {
-  flex: 1,
-  textAlign: 'right',
-  fontSize: 16,
-  fontWeight: '500',
-},
-  personText: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    padding: 15,
+    marginVertical: 5,
+    marginHorizontal: 10,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
+  },
+  leftText: {
+    flex: 1,
+    textAlign: 'left',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  centerText: {
+    flex: 1,
+    textAlign: 'center',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  rightText: {
+    flex: 1,
+    textAlign: 'right',
     fontSize: 16,
     fontWeight: '500',
   },
