@@ -1,3 +1,4 @@
+import * as SMS from 'expo-sms';
 import React, { useState } from 'react';
 import {
   View,
@@ -77,11 +78,8 @@ const tabData = {
     { id: '5', name: 'Person 20', number: '01810000020', roll: '20' },
   ],
   Tab5: [
-    { id: '1', name: 'Person 21', number: '01810000021', roll: '21' },
+    { id: '1', name: 'Person 21', number: '01639568198', roll: '21' },
     { id: '2', name: 'Person 22', number: '01810000022', roll: '22' },
-    { id: '3', name: 'Person 23', number: '01810000023', roll: '23' },
-    { id: '4', name: 'Person 24', number: '01810000024', roll: '24' },
-    { id: '5', name: 'Person 25', number: '01810000025', roll: '25' },
   ],
 };
 
@@ -89,12 +87,23 @@ const tabData = {
 function TabScreen({ data }) {
   const [message, setMessage] = useState('');
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (!message.trim()) return;
-    Alert.alert(
-      'Message Sent',
-      `Message sent to all persons in this tab:\n\n${message}`
-    );
+
+    const phoneNumbers = data.map((person) => person.number);
+    const isAvailable = await SMS.isAvailableAsync();
+
+    if (isAvailable) {
+      const { result } = await SMS.sendSMSAsync(phoneNumbers, message);
+      if (result === 'sent') {
+        Alert.alert('Success', 'Message sent to all numbers in this tab!');
+      } else {
+        Alert.alert('Cancelled', 'Message sending was cancelled.');
+      }
+    } else {
+      Alert.alert('Error', 'SMS is not available on this device.');
+    }
+
     setMessage('');
   };
 
@@ -149,54 +158,53 @@ function TabScreen({ data }) {
 export default function Dashboard() {
   return (
     <Tab.Navigator
-  screenOptions={{
-    headerShown: false,
-    tabBarIcon: () => null,
-    tabBarLabelStyle: {
-      fontSize: responsiveFontSize(14),
-      fontWeight: 'bold',
-      paddingVertical: 5,
-    },
-    tabBarStyle: {
-      height: 60,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-  }}
->
-  {Object.keys(tabData).map((tabName) => (
-    <Tab.Screen
-      key={tabName}
-      name={tabName}
-      children={() => <TabScreen data={tabData[tabName]} />}
-      options={{
-        tabBarLabel: ({ focused }) => (
-          <View
-            style={{
-              backgroundColor: focused ? '#4a90e2' : 'transparent',
-              paddingHorizontal: 18,
-              paddingVertical: 22,
-              borderRadius: 13,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Text
-              style={{
-                color: focused ? '#fff' : '#000',
-                fontWeight: 'bold',
-                fontSize: responsiveFontSize(14),
-                textAlign: 'center',
-              }}
-            >
-              {tabName}
-            </Text>
-          </View>
-        ),
+      screenOptions={{
+        headerShown: false,
+        tabBarIcon: () => null,
+        tabBarLabelStyle: {
+          fontSize: responsiveFontSize(14),
+          fontWeight: 'bold',
+          paddingVertical: 5,
+        },
+        tabBarStyle: {
+          height: 60,
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
       }}
-    />
-  ))}
-</Tab.Navigator>
+    >
+      {Object.keys(tabData).map((tabName) => (
+        <Tab.Screen
+          key={tabName}
+          name={tabName}
+          children={() => <TabScreen data={tabData[tabName]} />}
+          options={{
+            tabBarLabel: ({ focused }) => (
+              <View
+                style={{
+                  backgroundColor: focused ? '#4a90e2' : 'transparent',
+                  paddingHorizontal: 18,
+                  paddingVertical: 22,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Text
+                  style={{
+                    color: focused ? '#fff' : '#000',
+                    fontWeight: 'bold',
+                    fontSize: responsiveFontSize(14),
+                    textAlign: 'center',
+                  }}
+                >
+                  {tabName}
+                </Text>
+              </View>
+            ),
+          }}
+        />
+      ))}
+    </Tab.Navigator>
   );
 }
 
